@@ -1,0 +1,33 @@
+{
+  "name": "12_task_password",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "forgot",
+    "password",
+    "reset",
+    "password"
+  ],
+  "author": "Pruthvi",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "crypto-js": "^4.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mailgun-js": "^0.22.0",
+    "mongodb": "^3.6.4",
+    "mongoose": "^5.11.19",
+    "nodemailer": "^6.5.0",
+    "validator": "^13.5.2"
+  }
+}
