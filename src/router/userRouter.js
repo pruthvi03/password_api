@@ -25,11 +25,6 @@ userRouter.post('/users/signin', userFuncs.signInFun);
 
 userRouter.post("/users/reset-password",auth,userFuncs.resetPasswordFun);
 
-// forgot password router
-userRouter.post('/users/forgot-password',userFuncs.forgotPasswordFun);
-
-// verify token
-userRouter.get('/users/verification/:token',userFuncs.verifyToken);
 
 // signup Ui
 userRouter.get('/users/signup',userFuncs.signUpUi);
@@ -45,5 +40,15 @@ userRouter.get("/users/signin",userFuncs.signInUI);
 userRouter.get("/users/reset-password",auth,userFuncs.resetPasswordUI);
 
 userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
+
+// forgot password router
+userRouter.post('/users/forgot-password',userFuncs.forgotPasswordFun);
+
+// verify token
+userRouter.get('/users/verification/:token',userFuncs.verifyToken);
+
+userRouter.get("/users/new-password/:token",userFuncs.newPassUI);
+
+userRouter.post("/users/new-password/:token",userFuncs.newPassFun)
 
 module.exports = userRouter;

@@ -1,7 +1,7 @@
 const User = require("../models/users");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
-const { RIPEMD160 } = require("crypto-js");
+const mailgun = require("mailgun-js");
 
 // signup function
 const signUpFun = async (req, res) => {
@@ -85,7 +85,7 @@ const resetPasswordFun = async (req, res) => {
 // forgot password function
 const forgotPasswordFun = async (req, res) => {
     const email = req.body.email;
-    
+    // console.log(email)
     try {
         const user = await User.findOne({ email });
         if (!user) {
@@ -95,7 +95,20 @@ const forgotPasswordFun = async (req, res) => {
         user.tokens = user.tokens.concat({token});
         // console.log(user.tokens);
         await user.save();
-        res.send({ token });
+        // res.send({ token });
+        const mg = mailgun({apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAIL_DOMAIN});
+        const data = {
+            from: 'Pruthvi Password API <me@samples.mailgun.org>',
+            to: email,
+            subject: 'Reset Password',
+            html: `<html><h1>Hello </h1><br>
+            <a href="http://localhost:3000/users/verification/${token}" target="_blank">http://localhost:3000/users/verification/${token}</a><br>
+            <a href="http://localhost:3000/users/verification/${token}">Reset Password Link</a></html>`
+        };
+        mg.messages().send(data, function (error, body) {
+            console.log(body);
+        });
+        res.redirect("/users/signin");
     } catch (error) {
         res.status(500).send({ error });
     }
@@ -117,9 +130,10 @@ const verifyToken = async (req, res) => {
             if(!match){
                 throw new Error("Token expired") 
             }
-            user.tokens = []
+            // user.tokens = []
             await user.save();
-            res.send({"message":"Token verified"});
+            // res.send({"message":"Token verified"});
+            res.redirect('/users/new-password/'+verifyToken);
         } catch (err) {
             res.status(404).send({err:err.message})
         }
@@ -136,7 +150,6 @@ const homeFunUI = async (req,res)=>{
     // }
     const username = req.user.username;
     const email = req.user.email;
-
     res.render('home.ejs',{username,email});
 }
 
@@ -151,6 +164,42 @@ const resetPasswordUI = async (req,res)=>{
 const forgotPasswordUI = async (req,res)=>{
     res.render('forgot_pass.ejs')
 }
+
+const newPassUI = async (req,res)=>{
+    res.render('new_pass.ejs');
+}
+const newPassFun = async (req,res)=>{
+    const verifyToken = req.params.token;
+    jsonwebtoken.verify(verifyToken, 'thisisresetsecret', async (error, decoded) => {
+        try {
+            if (error) {
+                throw new Error(error.toString());
+            }
+            const user = await User.findOne({_id:decoded._id});
+            if(!user){
+                throw new Error("User not found")
+            }
+            const match = await User.findOne({_id:user._id, 'tokens.token':verifyToken});
+            
+            if(!match){
+                throw new Error("Token expired") 
+            }
+            const newPassword = req.body.newPassword
+            const newPassword2 = req.body.newPassword2
+            if (newPassword!==newPassword2){
+                res.redirect("/users/new-password/"+verifyToken);
+            }
+            user.tokens = [];
+            user.password = newPassword;
+            await user.save();
+            // res.send({"message":"Token verified"});
+            res.redirect('/users/signin');
+        } catch (err) {
+            res.status(404).send({err:err.message})
+        }
+    });
+}
+
 module.exports = {
     signUpFun,
     signInFun,
@@ -163,5 +212,7 @@ module.exports = {
     homeFunUI,
     signInUI,
     resetPasswordUI,
-    forgotPasswordUI
+    forgotPasswordUI,
+    newPassFun,
+    newPassUI
 }

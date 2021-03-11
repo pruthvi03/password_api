@@ -1,7 +1,7 @@
 require('./db/mongoose');
 
-const { urlencoded } = require('express');
 const express = require('express');
+require('dotenv').config()
 const cookieParser = require('cookie-parser')
 const app = express();
 const path = require('path');
@@ -17,6 +17,7 @@ app.set('views',path.join(__dirname,'views'));
 app.use(express.static('public'));
 app.use(userRouter);
 app.use(cookieParser())
+// app.use()
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`); 
 });
