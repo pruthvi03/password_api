@@ -79,17 +79,12 @@ userSchema.methods.generateAuthToken = async function () {
         var ciphertext = CryptoJS.AES.encrypt(token, 'secret key 123').toString();
         // console.log("ciphertext: ", ciphertext)
 
-        // // Decrypt
-        // var bytes  = await CryptoJS.AES.decrypt(ciphertext, 'secret key 123');
-        // var originalText = bytes.toString(CryptoJS.enc.Utf8);
-        // console.log("originalText: ",originalText); // 'my message'
-
-        user.tokens = user.tokens.concat({token:ciphertext});
+        user.tokens = user.tokens.concat({ token: ciphertext });
         // console.log("user.tokens:= ",user.tokens)
         await user.save();
         return ciphertext
     } catch (error) {
-        throw new Error({ error: "error in gnerateAuth" });
+        throw new Error({ "error": error.message });
     }
 }
 

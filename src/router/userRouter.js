@@ -21,7 +21,7 @@ userRouter.post('/users/signup', userFuncs.signUpFun);
 userRouter.post('/users/signin', userFuncs.signInFun);
 
 
-userRouter.post("/users/signout", auth, userFuncs.signOutFun);
+// userRouter.post("/users/signout", auth, userFuncs.signOutFun);
 
 userRouter.post("/users/reset-password",auth,userFuncs.resetPasswordFun);
 
@@ -36,6 +36,14 @@ userRouter.get('/users/signup',userFuncs.signUpUi);
 
 userRouter.get("/users/home", auth, userFuncs.homeFun);
 
-userRouter.get("/home", userFuncs.homeFunUI);
+userRouter.get("/home", auth,userFuncs.homeFunUI);
+
+userRouter.get("/users/signout",auth, userFuncs.signOutFun)
+
+userRouter.get("/users/signin",userFuncs.signInUI);
+
+userRouter.get("/users/reset-password",auth,userFuncs.resetPasswordUI);
+
+userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
 
 module.exports = userRouter;

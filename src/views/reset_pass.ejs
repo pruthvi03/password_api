@@ -1,0 +1,13 @@
+<%-include('./partials/header')-%>
+<form class="container mt-5 w-25" method="POST">
+    <div class="form-group">
+      <label for="inputPassword">Current Password</label>
+      <input type="password" name="oldPassword" class="form-control" id="inputPassword">
+    </div>
+    <div class="form-group">
+        <label for="inputPassword">New Password</label>
+        <input type="password" name="newPassword" class="form-control" id="inputPassword">
+      </div>
+    <button type="submit" class="form-control btn btn-success">Submit</button>
+  </form>
+<%-include('./partials/footer')-%>

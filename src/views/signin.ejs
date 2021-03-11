@@ -1,10 +1,6 @@
 <%-include('./partials/header')-%>
 <form class="container mt-5 w-25" method="POST">
     <div class="form-group">
-        <label for="inputUserName">Username (Firstname + Lastname)</label>
-        <input type="text" name="username" class="form-control" id="InputUserName">
-      </div>
-    <div class="form-group">
       <label for="inputEmail1">Email address</label>
       <input type="email" name="email" class="form-control" id="inputEmail1" aria-describedby="emailHelp">
       <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
@@ -13,8 +9,8 @@
       <label for="inputPassword">Password</label>
       <input type="password" name="password" class="form-control" id="inputPassword">
     </div>
-    <a href="/users/signin">Already have a account?</a><br>
-    <a href="/users/forgot-password">forgot password?</a>
+    <a href="/users/forgot-password">forgot password?</a><br>
+    <a href="/users/signup">Signup</a>
     <button type="submit" class="form-control btn btn-success">Submit</button>
   </form>
 <%-include('./partials/footer')-%>

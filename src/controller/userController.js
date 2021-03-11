@@ -5,18 +5,22 @@ const { RIPEMD160 } = require("crypto-js");
 
 // signup function
 const signUpFun = async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const username = req.body.username;
     const email = req.body.email;
     const password = req.body.password;
-    console.log({username,email,password})
+    // console.log({username,email,password})
     const user = new User({username,email,password});
+    // console.log(user);
     try {
         await user.save();
         const token = await user.generateAuthToken();
-        res.status(201).send({ user, token });
+        // res.status(201).send({ user, token });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        res.redirect('/home');
     } catch (error) {
-        res.status(500).send({ error: error });
+        // console.log(error)
+        res.status(500).send(error.message);
     }
 }
 
@@ -27,7 +31,9 @@ const signInFun = async (req, res) => {
     try {
         const user = await User.findByCredentials(email, password);
         const token = await user.generateAuthToken();
-        res.status(200).send({ user, token });
+        // res.status(200).send({ user, token });
+        res.cookie('token',token,{maxAge:900000,httpOnly:true});
+        res.redirect('/home');
     } catch (error) {
         res.status(500).send({ error });
     }
@@ -41,15 +47,18 @@ const homeFun = async (req, res) => {
 
 // signout function
 const signOutFun = async (req, res) => {
+    const user = req.user;
     try {
-        const user = req.user;
+        // console.log(user)
         user.tokens = user.tokens.filter((token) => {
             return token.token !== req.token
         })
+        // cookies.set('testtoken', {expires: Date.now()});
+        res.cookie('token', req.token, { maxAge:0, httpOnly: true });
         await user.save();
-        res.send({ message: "logged out" });
+        res.redirect("/users/signup");
     } catch (error) {
-        res.status(500).send({ error: error, tokens: user.tokens });
+        res.status(500).send({ error: error.message, tokens: user.tokens });
     }
 }
 
@@ -63,11 +72,13 @@ const resetPasswordFun = async (req, res) => {
             throw new Error('Old Password does not match');
         }
         req.user.password = newPassword;
+        req.user.tokens = []
         await req.user.save();
-        res.status(200).send({ oldPassword, newPassword });
+        // res.status(200).send({ oldPassword, newPassword });
+        res.redirect("/users/signin");
 
     } catch (error) {
-        res.status(500).send({ error })
+        res.status(500).send({ error:error.message })
     }
 }
 
@@ -82,7 +93,7 @@ const forgotPasswordFun = async (req, res) => {
         }
         const token = jsonwebtoken.sign({ _id: user._id }, 'thisisresetsecret', { expiresIn: '30m' });
         user.tokens = user.tokens.concat({token});
-        console.log(user.tokens);
+        // console.log(user.tokens);
         await user.save();
         res.send({ token });
     } catch (error) {
@@ -119,10 +130,27 @@ const signUpUi = (req,res)=>{
     res.render('index.ejs');
 }
 
-const homeFunUI = (req,res)=>{
-    res.render('home.ejs');
+const homeFunUI = async (req,res)=>{
+    // if (!req.cookies.token) {
+    //     console.log("cookie not found");
+    // }
+    const username = req.user.username;
+    const email = req.user.email;
+
+    res.render('home.ejs',{username,email});
 }
 
+const signInUI = async (req,res)=>{
+    res.render('signin.ejs');
+}
+
+const resetPasswordUI = async (req,res)=>{
+    res.render('reset_pass.ejs');
+}
+
+const forgotPasswordUI = async (req,res)=>{
+    res.render('forgot_pass.ejs')
+}
 module.exports = {
     signUpFun,
     signInFun,
@@ -132,5 +160,8 @@ module.exports = {
     forgotPasswordFun,
     verifyToken,
     signUpUi,
-    homeFunUI
+    homeFunUI,
+    signInUI,
+    resetPasswordUI,
+    forgotPasswordUI
 }
