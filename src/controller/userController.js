@@ -80,8 +80,11 @@ const forgotPasswordFun = async (req, res) => {
         if (!user) {
             throw new Error('User not found!!!');
         }
-        const resetToken = jsonwebtoken.sign({ _id: user._id }, 'thisisresetsecret', { expiresIn: '1m' });
-        res.send({ resetToken });
+        const token = jsonwebtoken.sign({ _id: user._id }, 'thisisresetsecret', { expiresIn: '30m' });
+        user.tokens = user.tokens.concat({token});
+        console.log(user.tokens);
+        await user.save();
+        res.send({ token });
     } catch (error) {
         res.status(500).send({ error });
     }
@@ -89,16 +92,35 @@ const forgotPasswordFun = async (req, res) => {
 
 const verifyToken = async (req, res) => {
     const verifyToken = req.params.token;
-    jsonwebtoken.verify(verifyToken, 'thisisresetsecret', (error, decoded) => {
-        if (error) {
-            res.send({ error });
+    jsonwebtoken.verify(verifyToken, 'thisisresetsecret', async (error, decoded) => {
+        try {
+            if (error) {
+                throw new Error(error.toString());
+            }
+            const user = await User.findOne({_id:decoded._id});
+            if(!user){
+                throw new Error("User not found")
+            }
+            const match = await User.findOne({_id:user._id, 'tokens.token':verifyToken});
+            
+            if(!match){
+                throw new Error("Token expired") 
+            }
+            user.tokens = []
+            await user.save();
+            res.send({"message":"Token verified"});
+        } catch (err) {
+            res.status(404).send({err:err.message})
         }
-        res.send(decoded);
     });
 }
 
 const signUpUi = (req,res)=>{
     res.render('index.ejs');
+}
+
+const homeFunUI = (req,res)=>{
+    res.render('home.ejs');
 }
 
 module.exports = {
@@ -109,5 +131,6 @@ module.exports = {
     resetPasswordFun,
     forgotPasswordFun,
     verifyToken,
-    signUpUi
+    signUpUi,
+    homeFunUI
 }

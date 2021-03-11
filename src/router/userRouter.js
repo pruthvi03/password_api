@@ -20,7 +20,6 @@ userRouter.post('/users/signup', userFuncs.signUpFun);
 
 userRouter.post('/users/signin', userFuncs.signInFun);
 
-userRouter.get("/users/home", auth, userFuncs.homeFun);
 
 userRouter.post("/users/signout", auth, userFuncs.signOutFun);
 
@@ -34,4 +33,9 @@ userRouter.get('/users/verification/:token',userFuncs.verifyToken);
 
 // signup Ui
 userRouter.get('/users/signup',userFuncs.signUpUi);
+
+userRouter.get("/users/home", auth, userFuncs.homeFun);
+
+userRouter.get("/home", userFuncs.homeFunUI);
+
 module.exports = userRouter;
