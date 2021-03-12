@@ -14,26 +14,39 @@ const userFuncs = require('../controller/userController');
 // - Link expiration within 30 minutes.
 // - Note: If I copy paste token on jwt.io it should not show any details (hint: encrypt JWT token)
 
-userRouter.get("/", auth,userFuncs.homeFunUI);
+// home router
+userRouter.route("/")
+    .get(auth, userFuncs.homeFunUI);
 
 // signup Ui
-userRouter.get('/users/signup',userFuncs.signUpUi);
-userRouter.post('/users/signup', userFuncs.signUpFun);
+userRouter.route('/users/signup')
+    .get(userFuncs.signUpUi)
+    .post(userFuncs.signUpFun);
 
-userRouter.get("/users/signin",userFuncs.signInUI);
-userRouter.post('/users/signin', userFuncs.signInFun);
+// signin router
+userRouter.route("/users/signin")
+    .get(userFuncs.signInUI)
+    .post(userFuncs.signInFun);
 
-userRouter.get("/users/signout",auth, userFuncs.signOutFun)
+// signout router
+userRouter.route("/users/signout")
+    .get(auth, userFuncs.signOutFun);
 
-userRouter.get("/users/reset-password",auth,userFuncs.resetPasswordUI);
-userRouter.post("/users/reset-password",auth,userFuncs.resetPasswordFun);
+
+// reset password router
+userRouter.route("/users/reset-password")
+    .get(auth, userFuncs.resetPasswordUI)
+    .post(auth, userFuncs.resetPasswordFun);
 
 // forgot password router
-userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
-userRouter.post('/users/forgot-password',userFuncs.forgotPasswordFun);
+userRouter.route("/users/forgot-password")
+    .get(userFuncs.forgotPasswordUI)
+    .post(userFuncs.forgotPasswordFun);
 
-userRouter.get("/users/new-password/:token",forgot_pass,userFuncs.newPassUI);
-userRouter.post("/users/new-password/:token",userFuncs.newPassFun)
+// new password router
+userRouter.route("/users/new-password/:token")
+    .get(forgot_pass, userFuncs.newPassUI)
+    .post(userFuncs.newPassFun);
 
 module.exports = userRouter;
 

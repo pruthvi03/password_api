@@ -6,27 +6,16 @@ const Cryptr = require('cryptr');
 
 
 const homeFunUI = async (req, res) => {
-    // if (!req.cookies.token) {
-    //     console.log("cookie not found");    
-    // }
-    const username = req.user.username;
-    const email = req.user.email;
+    const { username, email } = req.user;
     res.render('home.ejs', { username, email });
 }
-
-
-
 
 const signUpUi = (req, res) => {
     res.render('signup.ejs');
 }
 // signup function
 const signUpFun = async (req, res) => {
-    // console.log(req.body);
-    const username = req.body.username;
-    const email = req.body.email;
-    const password = req.body.password;
-    const user = new User({ username, email, password });
+    const user = new User(req.body);
     try {
         await user.save();
         const token = await user.generateAuthToken();
@@ -48,8 +37,7 @@ const signInUI = async (req, res) => {
 }
 // signin function
 const signInFun = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body;
     try {
         if (!email || !password) {
             throw new Error("All fields are required");
@@ -93,8 +81,7 @@ const resetPasswordUI = async (req, res) => {
 }
 // Reset password function
 const resetPasswordFun = async (req, res) => {
-    const oldPassword = req.body.oldPassword;
-    const newPassword = req.body.newPassword;
+    const { oldPassword, newPassword } = req.body;
     try {
         const match = await bcrypt.compare(oldPassword, req.user.password);
         if (!match) {
@@ -162,8 +149,7 @@ const newPassUI = async (req, res) => {
 }
 const newPassFun = async (req, res) => {
     try {
-        const newPassword = req.body.newPassword
-        const newPassword2 = req.body.newPassword2
+        const { newPassword, newPassword2 } = req.body;
         if (newPassword !== newPassword2) {
             throw new Error("Both passwords were not same");
         }
