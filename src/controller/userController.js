@@ -2,19 +2,31 @@ const User = require("../models/users");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const mailgun = require("mailgun-js");
-const CryptoJS = require("crypto-js");
 const Cryptr = require('cryptr');
 
 
+const homeFunUI = async (req, res) => {
+    // if (!req.cookies.token) {
+    //     console.log("cookie not found");    
+    // }
+    const username = req.user.username;
+    const email = req.user.email;
+    res.render('home.ejs', { username, email });
+}
+
+
+
+
+const signUpUi = (req, res) => {
+    res.render('signup.ejs');
+}
 // signup function
 const signUpFun = async (req, res) => {
     // console.log(req.body);
     const username = req.body.username;
     const email = req.body.email;
     const password = req.body.password;
-    // console.log({username,email,password})
     const user = new User({ username, email, password });
-    // console.log(user);
     try {
         await user.save();
         const token = await user.generateAuthToken();
@@ -23,12 +35,17 @@ const signUpFun = async (req, res) => {
         req.flash('success_msg', 'Account Created Successfully');
         res.redirect('/');
     } catch (error) {
-        // console.log(error)
         req.flash('error_msg', error.message);
         res.redirect('/users/signup')
     }
 }
 
+
+
+
+const signInUI = async (req, res) => {
+    res.render('signin.ejs');
+}
 // signin function
 const signInFun = async (req, res) => {
     const email = req.body.email;
@@ -51,20 +68,13 @@ const signInFun = async (req, res) => {
 
 }
 
-// homefun (checking user is auntheticated or not) 
-const homeFun = async (req, res) => {
-    res.status(200).send({ "message": "You are auntheticated User!!!" });
-}
-
 // signout function
 const signOutFun = async (req, res) => {
     const user = req.user;
     try {
-        // console.log(user)
         user.tokens = user.tokens.filter((token) => {
             return token.token !== req.token
         })
-        // cookies.set('testtoken', {expires: Date.now()});
         res.cookie('token', req.token, { maxAge: 0, httpOnly: true });
         await user.save();
         req.flash('success_msg', 'Signed Out Successfully');
@@ -76,6 +86,11 @@ const signOutFun = async (req, res) => {
     }
 }
 
+
+
+const resetPasswordUI = async (req, res) => {
+    res.render('reset_pass.ejs');
+}
 // Reset password function
 const resetPasswordFun = async (req, res) => {
     const oldPassword = req.body.oldPassword;
@@ -99,23 +114,26 @@ const resetPasswordFun = async (req, res) => {
     }
 }
 
+
+
+
+const forgotPasswordUI = async (req, res) => {
+    res.render('forgot_pass.ejs')
+}
+
 // forgot password function
 const forgotPasswordFun = async (req, res) => {
     const email = req.body.email;
-    // console.log(email)
     try {
         const user = await User.findOne({ email });
         if (!user) {
             throw new Error('User not found!!!');
         }
         const token = jsonwebtoken.sign({ _id: user._id }, 'thisisresetsecret', { expiresIn: '30m' });
-        
-        // const encrypted = CryptoJS.AES.encrypt(token,'secret key 123').toString();
         const cryptr = new Cryptr('myTotalySecretKey');
         const encrypted = cryptr.encrypt(token);
 
         user.tokens = user.tokens.concat({ token: encrypted });
-        // console.log(user.tokens);
         await user.save();
         // res.send({ token });
         const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAIL_DOMAIN });
@@ -138,33 +156,9 @@ const forgotPasswordFun = async (req, res) => {
     }
 }
 
-const signUpUi = (req, res) => {
-    res.render('index.ejs');
-}
-
-const homeFunUI = async (req, res) => {
-    // if (!req.cookies.token) {
-    //     console.log("cookie not found");
-    // }
-    const username = req.user.username;
-    const email = req.user.email;
-    res.render('home.ejs', { username, email });
-}
-
-const signInUI = async (req, res) => {
-    res.render('signin.ejs');
-}
-
-const resetPasswordUI = async (req, res) => {
-    res.render('reset_pass.ejs');
-}
-
-const forgotPasswordUI = async (req, res) => {
-    res.render('forgot_pass.ejs')
-}
 
 const newPassUI = async (req, res) => {
-    res.render('new_pass.ejs', { _id: req.userID, token:req.token});
+    res.render('new_pass.ejs', { _id: req.userID, token: req.token });
 }
 const newPassFun = async (req, res) => {
     try {
@@ -173,7 +167,7 @@ const newPassFun = async (req, res) => {
         if (newPassword !== newPassword2) {
             throw new Error("Both passwords were not same");
         }
-        const user = await User.findOne({_id:req.body._id});
+        const user = await User.findOne({ _id: req.body._id });
         user.tokens = [];
         user.password = newPassword;
         await user.save();
@@ -183,23 +177,24 @@ const newPassFun = async (req, res) => {
     } catch (err) {
         // res.status(404).send({ err: err.message })
         req.flash('error_msg', err.message);
-        res.redirect('/users/new-password/'+req.body.token);
+        res.redirect('/users/new-password/' + req.body.token);
     }
 }
 
+
+
+
 module.exports = {
-    signUpFun,
-    signInFun,
-    homeFun,
-    signOutFun,
-    resetPasswordFun,
-    forgotPasswordFun,
-    // verifyToken,
-    signUpUi,
     homeFunUI,
+    signUpUi,
+    signUpFun,
     signInUI,
+    signInFun,
+    signOutFun,
     resetPasswordUI,
+    resetPasswordFun,
     forgotPasswordUI,
+    forgotPasswordFun,
     newPassFun,
     newPassUI
 }

@@ -19,7 +19,7 @@ const forgot_pass = async (req, res, next) => {
                 if (error) {
                     throw new Error(error);
                 }
-                const user = await User.findOne({ _id: decoded._id});
+                const user = await User.findOne({ _id: decoded._id });
                 if (!user) {
                     throw new Error("User not found")
                 }
@@ -36,7 +36,6 @@ const forgot_pass = async (req, res, next) => {
                 res.redirect("/users/signup")
             }
         })
-        // const user = await User.findOne
     } catch (error) {
         console.log(error)
         req.flash("error_msg", error.message);

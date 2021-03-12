@@ -41,7 +41,6 @@ const userSchema = new mongoose.Schema({
     ]
 }, { timestamps: true });
 
-// userSchema.statics.findByCredntials()
 userSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
@@ -73,14 +72,9 @@ userSchema.statics.findByCredentials = async function (email, password) {
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
     try {
-
         const token = await jsonwebtoken.sign({ _id: user._id.toString() }, 'thisismysecret');
-        // Encrypt
         var ciphertext = CryptoJS.AES.encrypt(token, 'secret key 123').toString();
-        // console.log("ciphertext: ", ciphertext)
-
         user.tokens = user.tokens.concat({ token: ciphertext });
-        // console.log("user.tokens:= ",user.tokens)
         await user.save();
         return ciphertext
     } catch (error) {

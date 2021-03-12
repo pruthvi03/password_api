@@ -2,7 +2,6 @@ var CryptoJS = require("crypto-js");
 var jsonwebtoken = require("jsonwebtoken");
 const User = require("../models/users");
 
-
 const auth = async (req, res, next) => {
     try {
         // const token = req.header("Authorization").replace('Bearer ', '');
@@ -10,9 +9,6 @@ const auth = async (req, res, next) => {
         if (!token) {
             throw new Error('please login')
         }
-        // console.log("token found ",token)
-
-        // console.log(object)('No cookie found');
 
         // Decrypt
         var bytes = await CryptoJS.AES.decrypt(token, 'secret key 123');

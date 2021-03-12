@@ -3,9 +3,6 @@ const userRouter = express.Router();
 const auth = require('../middleware/auth');
 const forgot_pass = require('../middleware/forgot_pass');
 const userFuncs = require('../controller/userController');
-const mailgun = require("mailgun-js");
-// var Mailgun = require('mailgun-js');
-
 
 //                  Task
 // create user model
@@ -17,38 +14,32 @@ const mailgun = require("mailgun-js");
 // - Link expiration within 30 minutes.
 // - Note: If I copy paste token on jwt.io it should not show any details (hint: encrypt JWT token)
 
-userRouter.post('/users/signup', userFuncs.signUpFun);
-
-userRouter.post('/users/signin', userFuncs.signInFun);
-
-
-// userRouter.post("/users/signout", auth, userFuncs.signOutFun);
-
-userRouter.post("/users/reset-password",auth,userFuncs.resetPasswordFun);
-
+userRouter.get("/", auth,userFuncs.homeFunUI);
 
 // signup Ui
 userRouter.get('/users/signup',userFuncs.signUpUi);
+userRouter.post('/users/signup', userFuncs.signUpFun);
 
-userRouter.get("/users/home", auth, userFuncs.homeFun);
-
-userRouter.get("/", auth,userFuncs.homeFunUI);
+userRouter.get("/users/signin",userFuncs.signInUI);
+userRouter.post('/users/signin', userFuncs.signInFun);
 
 userRouter.get("/users/signout",auth, userFuncs.signOutFun)
 
-userRouter.get("/users/signin",userFuncs.signInUI);
-
 userRouter.get("/users/reset-password",auth,userFuncs.resetPasswordUI);
-
-userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
+userRouter.post("/users/reset-password",auth,userFuncs.resetPasswordFun);
 
 // forgot password router
+userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
 userRouter.post('/users/forgot-password',userFuncs.forgotPasswordFun);
 
-// verify token
-
 userRouter.get("/users/new-password/:token",forgot_pass,userFuncs.newPassUI);
-
 userRouter.post("/users/new-password/:token",userFuncs.newPassFun)
 
 module.exports = userRouter;
+
+
+
+
+
+
+
