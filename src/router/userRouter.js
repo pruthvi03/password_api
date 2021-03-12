@@ -1,6 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const auth = require('../middleware/auth');
+const forgot_pass = require('../middleware/forgot_pass');
 const userFuncs = require('../controller/userController');
 const mailgun = require("mailgun-js");
 // var Mailgun = require('mailgun-js');
@@ -31,7 +32,7 @@ userRouter.get('/users/signup',userFuncs.signUpUi);
 
 userRouter.get("/users/home", auth, userFuncs.homeFun);
 
-userRouter.get("/home", auth,userFuncs.homeFunUI);
+userRouter.get("/", auth,userFuncs.homeFunUI);
 
 userRouter.get("/users/signout",auth, userFuncs.signOutFun)
 
@@ -45,9 +46,8 @@ userRouter.get("/users/forgot-password",userFuncs.forgotPasswordUI);
 userRouter.post('/users/forgot-password',userFuncs.forgotPasswordFun);
 
 // verify token
-userRouter.get('/users/verification/:token',userFuncs.verifyToken);
 
-userRouter.get("/users/new-password/:token",userFuncs.newPassUI);
+userRouter.get("/users/new-password/:token",forgot_pass,userFuncs.newPassUI);
 
 userRouter.post("/users/new-password/:token",userFuncs.newPassFun)
 

@@ -13,6 +13,8 @@
   
 <%-include('./partials/messages')-%>
     <form class="container mt-5 auto" method="POST">
+      <input type="hidden" name="_id" value="<%=_id%>">
+      <input type="hidden" name="token" value="<%=token%>">
         <div class="form-group">
           <label for="inputPassword">New Password</label>
           <input type="password" name="newPassword" class="form-control" id="inputPassword">

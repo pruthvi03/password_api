@@ -2,6 +2,9 @@ const User = require("../models/users");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const mailgun = require("mailgun-js");
+const CryptoJS = require("crypto-js");
+const Cryptr = require('cryptr');
+
 
 // signup function
 const signUpFun = async (req, res) => {
@@ -18,7 +21,7 @@ const signUpFun = async (req, res) => {
         // res.status(201).send({ user, token });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         req.flash('success_msg', 'Account Created Successfully');
-        res.redirect('/home');
+        res.redirect('/');
     } catch (error) {
         // console.log(error)
         req.flash('error_msg', error.message);
@@ -31,7 +34,7 @@ const signInFun = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     try {
-        if(!email || !password){
+        if (!email || !password) {
             throw new Error("All fields are required");
         }
         const user = await User.findByCredentials(email, password);
@@ -39,7 +42,7 @@ const signInFun = async (req, res) => {
         // res.status(200).send({ user, token });
         res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         req.flash('success_msg', 'Signed In Successfully');
-        res.redirect('/home');
+        res.redirect('/');
     } catch (error) {
         // res.status(500).send({ error });
         req.flash('error_msg', error.message);
@@ -106,12 +109,17 @@ const forgotPasswordFun = async (req, res) => {
             throw new Error('User not found!!!');
         }
         const token = jsonwebtoken.sign({ _id: user._id }, 'thisisresetsecret', { expiresIn: '30m' });
-        user.tokens = user.tokens.concat({ token });
+        
+        // const encrypted = CryptoJS.AES.encrypt(token,'secret key 123').toString();
+        const cryptr = new Cryptr('myTotalySecretKey');
+        const encrypted = cryptr.encrypt(token);
+
+        user.tokens = user.tokens.concat({ token: encrypted });
         // console.log(user.tokens);
         await user.save();
         // res.send({ token });
         const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAIL_DOMAIN });
-        const link = `http://localhost:3000/users/verification/${token}`;
+        const link = `http://localhost:3000/users/new-password/${encrypted}`;
         const data = {
             from: 'Pruthvi Password API <me@samples.mailgun.org>',
             to: email,
@@ -121,42 +129,13 @@ const forgotPasswordFun = async (req, res) => {
         mg.messages().send(data, function (error, body) {
             console.log(body);
         });
-        req.flash('success_msg', 'Mail sent Successfully');
+        req.flash('success_msg', `Mail sent Successfully to ${email}`);
         res.redirect("/users/signin");
     } catch (error) {
         // res.status(500).send({ error });
         req.flash('error_msg', error.message);
         res.redirect('/users/forgot-password')
     }
-}
-
-const verifyToken = async (req, res) => {
-    const verifyToken = req.params.token;
-    jsonwebtoken.verify(verifyToken, 'thisisresetsecret', async (error, decoded) => {
-        try {
-            if (error) {
-                throw new Error(error.toString());
-            }
-            const user = await User.findOne({ _id: decoded._id });
-            if (!user) {
-                throw new Error("User not found")
-            }
-            const match = await User.findOne({ _id: user._id, 'tokens.token': verifyToken });
-
-            if (!match) {
-                throw new Error("Token expired")
-            }
-            // user.tokens = []
-            await user.save();
-            // res.send({"message":"Token verified"});
-            req.flash('success_msg', 'Token verified Successfully');
-            res.redirect('/users/new-password/' + verifyToken);
-        } catch (err) {
-            // res.status(404).send({err:err.message})
-            req.flash('error_msg', error.message);
-            res.redirect('/users/signup')
-        }
-    });
 }
 
 const signUpUi = (req, res) => {
@@ -185,41 +164,27 @@ const forgotPasswordUI = async (req, res) => {
 }
 
 const newPassUI = async (req, res) => {
-    res.render('new_pass.ejs');
+    res.render('new_pass.ejs', { _id: req.userID, token:req.token});
 }
 const newPassFun = async (req, res) => {
-    const verifyToken = req.params.token;
-    jsonwebtoken.verify(verifyToken, 'thisisresetsecret', async (error, decoded) => {
-        try {
-            if (error) {
-                throw new Error(error.toString());
-            }
-            const user = await User.findOne({ _id: decoded._id });
-            if (!user) {
-                throw new Error("User not found")
-            }
-            const match = await User.findOne({ _id: user._id, 'tokens.token': verifyToken });
-
-            if (!match) {
-                throw new Error("Token expired")
-            }
-            const newPassword = req.body.newPassword
-            const newPassword2 = req.body.newPassword2
-            if (newPassword !== newPassword2) {
-                res.redirect("/users/new-password/" + verifyToken);
-            }
-            user.tokens = [];
-            user.password = newPassword;
-            await user.save();
-            // res.send({"message":"Token verified"});
-            req.flash('success_msg', 'New password is saved');
-            res.redirect('/users/signin');
-        } catch (err) {
-            // res.status(404).send({ err: err.message })
-            req.flash('error_msg', error.message);
-            res.redirect('/users/signup')
+    try {
+        const newPassword = req.body.newPassword
+        const newPassword2 = req.body.newPassword2
+        if (newPassword !== newPassword2) {
+            throw new Error("Both passwords were not same");
         }
-    });
+        const user = await User.findOne({_id:req.body._id});
+        user.tokens = [];
+        user.password = newPassword;
+        await user.save();
+        // res.send({"message":"Token verified"});
+        req.flash('success_msg', 'New password is saved');
+        res.redirect('/users/signin');
+    } catch (err) {
+        // res.status(404).send({ err: err.message })
+        req.flash('error_msg', err.message);
+        res.redirect('/users/new-password/'+req.body.token);
+    }
 }
 
 module.exports = {
@@ -229,7 +194,7 @@ module.exports = {
     signOutFun,
     resetPasswordFun,
     forgotPasswordFun,
-    verifyToken,
+    // verifyToken,
     signUpUi,
     homeFunUI,
     signInUI,
