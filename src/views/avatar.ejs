@@ -5,7 +5,11 @@
         <img src="<%= avatar%>" height="250" width="250" class="rounded-circle img-responsive img-portfolio img-hover">
         <form class="form-control" method="POST" enctype="multipart/form-data">
             <input type="file" name="avatar"  class="form-control">
-            <button type="submit" class="form-control btn btn-success">Submit</button>
+            <button type="submit" class="form-control btn btn-success w-50">Submit</button>
+        </form>
+        <form method="POST" class="form-control" action="/users/change-avatar?_method=DELETE">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="form-control btn btn-danger w-50">Delete Avatar</button>
         </form>
     </div>
 <%- include('./partials/footer') -%>

@@ -7,6 +7,7 @@ const app = express();
 const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
+const methodOverride = require('method-override')
 const userRouter = require('./router/userRouter');
  
 const port = process.env.PORT || 3000;
@@ -17,7 +18,10 @@ app.use(cookieParser());
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'));
 app.use(express.static('public'));
-app.use(cookieParser())
+app.use(cookieParser());
+
+// override with POST having ?_method=DELETE
+app.use(methodOverride('_method'));
 // middleware for connect flash
 app.use(flash());
 // middleware session express

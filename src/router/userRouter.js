@@ -16,7 +16,8 @@ const userFuncs = require('../controller/userController');
 
 // home router
 userRouter.route("/")
-    .get(auth, userFuncs.homeFunUI);
+    .get(auth, userFuncs.homeFunUI)
+    .delete(auth, userFuncs.deleteUserFun);
 
 // signup Ui
 userRouter.route('/users/signup')
@@ -52,7 +53,7 @@ userRouter.route("/users/new-password/:token")
 userRouter.route("/users/change-avatar")
     .get(auth, userFuncs.avatarUploadUI)
     .post(auth, userFuncs.upload.single('avatar') ,userFuncs.avatarUploadFun)
-    // .delete(auth, userRouter.avatarDeleteFun)
+    .delete(auth, userFuncs.avatarDeleteFun)
 
 module.exports = userRouter;
 

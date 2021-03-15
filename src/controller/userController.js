@@ -10,11 +10,11 @@ const sharp = require('sharp');
 const homeFunUI = (req, res) => {
     const { username, email, avatar } = req.user;
     var avatar_img;
-    if(avatar){
+    if (avatar) {
         avatar_img = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
-        }
-    else { avatar_img = "...";}
-    res.render('home', { username, email, avatar:avatar_img});
+    }
+    else { avatar_img = "..."; }
+    res.render('home', { username, email, avatar: avatar_img });
 }
 
 const signUpUi = (req, res) => {
@@ -52,7 +52,7 @@ const signInFun = async (req, res) => {
         const user = await User.findByCredentials(email, password);
         const token = await user.generateAuthToken();
         // res.status(200).send({ user, token });
-        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
+        res.cookie('token', token, { maxAge: DateTime.Now.AddDays(30), httpOnly: true });
         req.flash('success_msg', 'Signed In Successfully');
         res.redirect('/');
     } catch (error) {
@@ -174,13 +174,13 @@ const newPassFun = async (req, res) => {
     }
 }
 
-const avatarUploadUI = (req, res)=>{
+const avatarUploadUI = (req, res) => {
     var avatar;
-    if(req.user.avatar){
-    avatar = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
+    if (req.user.avatar) {
+        avatar = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
     }
-    else {avatar =""};
-    res.render("avatar", {avatar});
+    else { avatar = "" };
+    res.render("avatar", { avatar });
 }
 // multer
 const upload = multer({
@@ -198,8 +198,7 @@ const upload = multer({
     }
 });
 
-const avatarUploadFun = async (req, res)=>{
-    console.log(req.body);
+const avatarUploadFun = async (req, res) => {
     try {
         const buffer = await sharp(req.file.buffer)
             .resize({ width: 250, height: 250 })
@@ -214,6 +213,29 @@ const avatarUploadFun = async (req, res)=>{
         // req.status(500).send({ error: error.message });
         req.flash('error_msg', error.message);
         res.redirect('/users/change-avatar/');
+    }
+}
+
+const avatarDeleteFun = async (req, res) => {
+    try {
+        req.user.avatar = "";
+        await req.user.save();
+        req.flash('success_msg', 'Avatar is deleted');
+        res.redirect('/users/change-avatar/');
+    } catch (error) {
+        req.flash('error_msg', error.message);
+        res.redirect('/users/change-avatar/');
+    }
+}
+
+const deleteUserFun = async (req, res) => {
+    try {
+        await User.deleteOne({ _id: req.user._id })
+        req.flash('success_msg', 'User is deleted');
+        res.redirect('/users/signup/');
+    } catch (error) {
+        req.flash('error_msg', error.message);
+        res.redirect('/users/signup/');
     }
 }
 
@@ -232,5 +254,7 @@ module.exports = {
     newPassUI,
     avatarUploadUI,
     upload,
-    avatarUploadFun
+    avatarUploadFun,
+    avatarDeleteFun,
+    deleteUserFun
 }
