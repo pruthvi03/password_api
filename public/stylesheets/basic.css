@@ -1,0 +1,20 @@
+body{
+    background: #f0f0f0;
+}
+.home {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.home > .half {
+    margin-left: 10px;
+}
+
+@media only screen and (max-width: 620px) {
+    .home {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}

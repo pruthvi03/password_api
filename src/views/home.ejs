@@ -1,12 +1,42 @@
 <%-include('./partials/header') -%>
-<% var avatar=avatar; %>
-<%-include('./partials/navbar') -%>
+    <% var avatar=avatar; %>
+        <%-include('./partials/navbar') -%>
 
-<%-include('./partials/messages')-%>
-<h1>Home</h1>
-<div class="container">
-<img src="<%= avatar%>" height="250" width="250" class="rounded-circle img-responsive img-portfolio img-hover">
-<p><strong><%= username %></strong></p>
-<p><%= email %></p>
-</div>
-<%-include('./partials/footer') -%>
+            <%-include('./partials/messages')-%>
+                <h1>Home</h1>
+                <div class="container home">
+                    <div class="half left">
+                        <img src="<%= avatar%>" height="250" width="250"
+                            class="rounded-circle img-responsive img-portfolio img-hover">
+                        <p><strong>
+                                <%= username %>
+                            </strong></p>
+                        <p>
+                            <%= email %>
+                        </p>
+                    </div>
+                    <div class="half right">
+                        <h3>TODOs</h3>
+                        <div class="new_task">
+                            <form method="POST" action="/users/new-task" class="justify-content-center">
+                                <input type="text" name="title" class="form-control" placeholder="Add new task">
+                                <input type="text" name="description" class="form-control" placeholder="Add description">
+                                <button type="submit" class="form-control btn btn-success">+</button>
+                            </form>
+                        </div>
+                        <% tasks.forEach(task=>{%>
+                        <div class="card">
+                            <div class="card-body">
+                              <h5 class="card-title"><%= task.title%></h5>
+                              <p class="card-text"><%= task.description%></p>
+                              <form action="/users/delete-task?_method=DELETE" method="POST">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <input type="hidden" name = "_id" value="<%= task._id%>">
+                                <button type="submit" class="btn btn-danger">Delete This Task</button> 
+                              </form>
+                            </div>
+                          </div>
+                          <%})%>    
+                    </div>
+            </div>
+                <%-include('./partials/footer') -%>

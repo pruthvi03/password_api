@@ -52,9 +52,12 @@ userRouter.route("/users/new-password/:token")
 // avatar router
 userRouter.route("/users/change-avatar")
     .get(auth, userFuncs.avatarUploadUI)
-    .post(auth, userFuncs.upload.single('avatar') ,userFuncs.avatarUploadFun)
+    .post(auth, userFuncs.upload.single('avatar'), userFuncs.avatarUploadFun)
     .delete(auth, userFuncs.avatarDeleteFun)
 
+// userRouter.route("/users/new-task")
+//     .post(auth, userFuncs.createNewTaskFun);
+    
 module.exports = userRouter;
 
 

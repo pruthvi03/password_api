@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const Task = require("../models/tasks"); 
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const mailgun = require("mailgun-js");
@@ -7,14 +8,15 @@ const multer = require('multer');
 const sharp = require('sharp');
 
 
-const homeFunUI = (req, res) => {
+const homeFunUI = async (req, res) => {
     const { username, email, avatar } = req.user;
+    const tasks = await Task.find({owner:req.user._id}).sort({createdAt:-1});
     var avatar_img;
     if (avatar) {
         avatar_img = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
     }
     else { avatar_img = "..."; }
-    res.render('home', { username, email, avatar: avatar_img });
+    res.render('home', { username, email, avatar: avatar_img , tasks});
 }
 
 const signUpUi = (req, res) => {
@@ -52,7 +54,7 @@ const signInFun = async (req, res) => {
         const user = await User.findByCredentials(email, password);
         const token = await user.generateAuthToken();
         // res.status(200).send({ user, token });
-        res.cookie('token', token, { maxAge: DateTime.Now.AddDays(30), httpOnly: true });
+        res.cookie('token', token, { maxAge: 900000, httpOnly: true });
         req.flash('success_msg', 'Signed In Successfully');
         res.redirect('/');
     } catch (error) {
@@ -238,6 +240,8 @@ const deleteUserFun = async (req, res) => {
         res.redirect('/users/signup/');
     }
 }
+
+
 
 module.exports = {
     homeFunUI,
