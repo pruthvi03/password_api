@@ -48,6 +48,12 @@ userRouter.route("/users/new-password/:token")
     .get(forgot_pass, userFuncs.newPassUI)
     .post(userFuncs.newPassFun);
 
+// avatar router
+userRouter.route("/users/change-avatar")
+    .get(auth, userFuncs.avatarUploadUI)
+    .post(auth, userFuncs.upload.single('avatar') ,userFuncs.avatarUploadFun)
+    // .delete(auth, userRouter.avatarDeleteFun)
+
 module.exports = userRouter;
 
 

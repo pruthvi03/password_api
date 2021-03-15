@@ -3,15 +3,22 @@ const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const mailgun = require("mailgun-js");
 const Cryptr = require('cryptr');
+const multer = require('multer');
+const sharp = require('sharp');
 
 
-const homeFunUI = async (req, res) => {
-    const { username, email } = req.user;
-    res.render('home.ejs', { username, email });
+const homeFunUI = (req, res) => {
+    const { username, email, avatar } = req.user;
+    var avatar_img;
+    if(avatar){
+        avatar_img = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
+        }
+    else { avatar_img = "...";}
+    res.render('home', { username, email, avatar:avatar_img});
 }
 
 const signUpUi = (req, res) => {
-    res.render('signup.ejs');
+    res.render('signup');
 }
 // signup function
 const signUpFun = async (req, res) => {
@@ -32,7 +39,7 @@ const signUpFun = async (req, res) => {
 
 
 
-const signInUI = async (req, res) => {
+const signInUI = (req, res) => {
     res.render('signin.ejs');
 }
 // signin function
@@ -76,7 +83,7 @@ const signOutFun = async (req, res) => {
 
 
 
-const resetPasswordUI = async (req, res) => {
+const resetPasswordUI = (req, res) => {
     res.render('reset_pass.ejs');
 }
 // Reset password function
@@ -104,7 +111,7 @@ const resetPasswordFun = async (req, res) => {
 
 
 
-const forgotPasswordUI = async (req, res) => {
+const forgotPasswordUI = (req, res) => {
     res.render('forgot_pass.ejs')
 }
 
@@ -144,7 +151,7 @@ const forgotPasswordFun = async (req, res) => {
 }
 
 
-const newPassUI = async (req, res) => {
+const newPassUI = (req, res) => {
     res.render('new_pass.ejs', { _id: req.userID, token: req.token });
 }
 const newPassFun = async (req, res) => {
@@ -167,8 +174,48 @@ const newPassFun = async (req, res) => {
     }
 }
 
+const avatarUploadUI = (req, res)=>{
+    var avatar;
+    if(req.user.avatar){
+    avatar = 'data:image/jpeg;base64,' + req.user.avatar.toString('base64');
+    }
+    else {avatar =""};
+    res.render("avatar", {avatar});
+}
+// multer
+const upload = multer({
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        // cb(new Error('File must be a PDF'));
+        // cb(undefined,true);
+        // cb(undefined,false);
+        if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+            return cb(new Error('Please upload a image'));
+        }
+        cb(undefined, true);
+    }
+});
 
-
+const avatarUploadFun = async (req, res)=>{
+    console.log(req.body);
+    try {
+        const buffer = await sharp(req.file.buffer)
+            .resize({ width: 250, height: 250 })
+            .png()
+            .toBuffer();
+        req.user.avatar = buffer;
+        await req.user.save();
+        // res.status(200).send({ message: "file recieved" });
+        req.flash('success_msg', 'New avatar is saved');
+        res.redirect('/users/change-avatar/');
+    } catch (error) {
+        // req.status(500).send({ error: error.message });
+        req.flash('error_msg', error.message);
+        res.redirect('/users/change-avatar/');
+    }
+}
 
 module.exports = {
     homeFunUI,
@@ -182,5 +229,8 @@ module.exports = {
     forgotPasswordUI,
     forgotPasswordFun,
     newPassFun,
-    newPassUI
+    newPassUI,
+    avatarUploadUI,
+    upload,
+    avatarUploadFun
 }

@@ -1,6 +1,10 @@
 <%-include('./partials/header') -%>
+<% var avatar=avatar; %>
+<%-include('./partials/navbar') -%>
+
 <%-include('./partials/messages')-%>
 <h1>Home</h1>
+<img src="<%= avatar%>" height="250" width="250" class="rounded-circle img-responsive img-portfolio img-hover">
 <h2><%= username %></h2>
 <h2><%= email %></h2>
 <%-include('./partials/footer') -%>

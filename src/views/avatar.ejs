@@ -1,0 +1,11 @@
+<%- include('./partials/header') -%>
+<%- include('./partials/navbar') -%>
+<%- include('./partials/messages') -%>
+    <div class="container">
+        <img src="<%= avatar%>" height="250" width="250" class="rounded-circle img-responsive img-portfolio img-hover">
+        <form class="form-control" method="POST" enctype="multipart/form-data">
+            <input type="file" name="avatar"  class="form-control">
+            <button type="submit" class="form-control btn btn-success">Submit</button>
+        </form>
+    </div>
+<%- include('./partials/footer') -%>
