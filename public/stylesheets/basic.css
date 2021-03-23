@@ -10,11 +10,19 @@ body{
 .home > .half {
     margin-left: 10px;
 }
+.todocard{
+    margin-top: 10px;
+    width: 500px;
+}
 
-@media only screen and (max-width: 620px) {
+@media only screen and (max-width: 800px) {
     .home {
         display: flex;
         flex-direction: column;
         justify-content: center;
+    }
+    .todocard{
+        margin-top: 10px;
+        width: 300px;
     }
 }

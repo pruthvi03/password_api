@@ -232,7 +232,8 @@ const avatarDeleteFun = async (req, res) => {
 
 const deleteUserFun = async (req, res) => {
     try {
-        await User.deleteOne({ _id: req.user._id })
+        await Task.deleteMany({owner:req.user._id});
+        await User.deleteOne({ _id: req.user._id });
         req.flash('success_msg', 'User is deleted');
         res.redirect('/users/signup/');
     } catch (error) {

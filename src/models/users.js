@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jsonwebtoken = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const Task = require('./tasks');
 var CryptoJS = require("crypto-js");
 
 const userSchema = new mongoose.Schema({
@@ -39,7 +40,7 @@ const userSchema = new mongoose.Schema({
         }
     }
     ],
-    avatar:{
+    avatar: {
         type: Buffer,
     }
 }, { timestamps: true });
@@ -59,6 +60,8 @@ userSchema.pre('save', async function (next) {
     }
     next();
 })
+
+
 
 userSchema.statics.findByCredentials = async function (email, password) {
     const user = await User.findOne({ email: email });
