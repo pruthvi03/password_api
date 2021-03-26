@@ -6,6 +6,7 @@ const mailgun = require("mailgun-js");
 const Cryptr = require('cryptr');
 const multer = require('multer');
 const sharp = require('sharp');
+const mongoose = require("mongoose");
 
 
 const homeFunUI = async (req, res) => {
@@ -133,7 +134,7 @@ const forgotPasswordFun = async (req, res) => {
         await user.save();
         // res.send({ token });
         const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAIL_DOMAIN });
-        const link = `http://localhost:3000/users/new-password/${encrypted}`;
+        const link = `http://pruthvi-user-todoapp.herokuapp.com/users/new-password/${encrypted}`;
         const data = {
             from: 'Pruthvi Password API <me@samples.mailgun.org>',
             to: email,
@@ -231,12 +232,22 @@ const avatarDeleteFun = async (req, res) => {
 }
 
 const deleteUserFun = async (req, res) => {
+    const session = await mongoose.startSession(); // Start Session
+    session.startTransaction(); // Start Transaction
     try {
-        await Task.deleteMany({owner:req.user._id});
-        await User.deleteOne({ _id: req.user._id });
+        const opts = {session, new:true};
+        let update1 = await Task.deleteMany({owner:req.user._id},opts);
+        let update2 = await User.deleteOne({ _id: req.user._id },opts);
+        if (!update1.ok || !update2.ok){
+            throw new Error("Something went wrong");
+        }
+        await session.commitTransaction();
+        session.endSession();
         req.flash('success_msg', 'User is deleted');
         res.redirect('/users/signup/');
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         req.flash('error_msg', error.message);
         res.redirect('/users/signup/');
     }
